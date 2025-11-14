@@ -39,11 +39,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build public folder
+      - name: Build public folder (robust copy)
         run: |
           rm -rf public
-          mkdir public
-          cp index.html styles.css public/
+          mkdir -p public
+          # copy all HTML and CSS files that actually exist (won't fail if some are missing)
+          shopt -s nullglob
+          for f in *.html *.css; do
+            cp -- "$f" public/ || true
+          done
+          # list files copied (helpful in logs)
+          echo "public/ contents:"
+          ls -la public || true
 
       - name: Configure Pages
         uses: actions/configure-pages@v3
